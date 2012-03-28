@@ -222,19 +222,28 @@ var pjax = $.pjax = function( options ) {
     var title, oldTitle = document.title
 
     if ( options.fragment ) {
-      // If they specified a fragment, look for it in the response
+      // If they specified fragments, look for it in the response
       // and pull it out.
-      var html = $('<html>').html(data)
-      var $fragment = html.find(options.fragment)
-      if ( $fragment.length ) {
-        this.html($fragment.contents())
 
-        // If there's a <title> tag in the response, use it as
-        // the page's title. Otherwise, look for data-title and title attributes.
-        title = html.find('title').text() || $fragment.attr('title') || $fragment.data('title')
-      } else {
-        return window.location = url
-      }
+      var html = $('<html>').html(data)
+
+      $.each(options.fragment, function(index, value) { 
+
+        var $fragment = html.find(index)  
+        if ( $fragment.length ) {
+          $(value).html($fragment.contents()).attr("class", $fragment.attr('class'));
+  
+          // If there's a <title> tag in the response, use it as
+          // the page's title. Otherwise, look for data-title and title attributes.
+          title = html.find('title').text() || $fragment.attr('title') || $fragment.data('title')
+        } else {
+          return window.location = url
+        }
+      });
+
+      // Synchronize the container classes      
+      this.attr('class', html.find(options.targetContainer).attr('class'));
+      
     } else {
       // If we got no data or an entire web page, go directly
       // to the page and let normal error handling happen.
